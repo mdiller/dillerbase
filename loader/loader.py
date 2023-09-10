@@ -18,7 +18,7 @@ with open(env_path, "r") as f:
 		if match:
 			config[match.group(1)] = match.group(2)
 
-db_url = "postgres://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{DB_IP_ADDRESS}:{DB_POSTGRES_PORT}/{POSTGRES_DB}".format(config)
+db_url = "postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{DB_IP_ADDRESS}:{DB_POSTGRES_PORT}/{POSTGRES_DB}".format(**config)
 
 project_fields = [ 
 	"kills",
@@ -39,7 +39,7 @@ project_fields = [
 
 async def fetch_data():
 	steam_id = config["STEAM_ID"]
-	url = f"https://api.opendota.com/api/players/{steam_id}/matches?limit=20"  # Replace with your API endpoint
+	url = f"https://api.opendota.com/api/players/{steam_id}/matches?limit=30"  # Replace with your API endpoint
 	url += "".join(map(lambda x: f"&project={x}", project_fields))
 	
 	async with aiohttp.ClientSession() as session:
@@ -57,6 +57,8 @@ def insert_data(data, session):
 	try:
 		# Loop through the JSON data and insert each object into the database
 		for match in data:
+			if session.query(DotaMatch).filter_by(match_id=match["match_id"]).first():
+				continue # match already exists, skip
 
 			items = []
 			for i in range(6):

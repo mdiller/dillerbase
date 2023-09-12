@@ -38,7 +38,7 @@ services:
   
   dillerbase-api:
     container_name: dillerbase-api
-    build: ./server
+    build: .
     ports:
       - ${SERVER_PORT}:${SERVER_PORT}
     restart: unless-stopped

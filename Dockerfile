@@ -18,4 +18,4 @@ COPY ./server .
 # Copy Env File
 COPY .env ..
 
-CMD [ "npm", "run", "prod" ]
+CMD [ "npm", "run", "dev" ]

@@ -16,6 +16,6 @@ RUN npm install
 COPY . .
 
 # Copy Env File
-COPY ../.env ../
+COPY ../.env ./
 
 CMD [ "npm", "run", "prod" ]

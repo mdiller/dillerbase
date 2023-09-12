@@ -7,7 +7,11 @@ const fetch = require("node-fetch");
 
 const currentDirectory = path.dirname(__filename);
 const parentDirectory = path.resolve(path.join(currentDirectory, '..'));
-const configPath = path.join(parentDirectory, '.env');
+var configPath = path.join(parentDirectory, '.env');
+if (!fs.existsSync(configPath)) {
+	configPath = path.join(currentDirectory, '.env');
+}
+
 const config = {};
 var configText = fs.readFileSync(configPath, "utf8");
 const lines = configText.split('\n');

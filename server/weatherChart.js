@@ -1,6 +1,6 @@
 const Chartist    = require('chartist');
 const chartistSvg = require('chartist-svg');
-const chartistSvgPlugin = require('chartist-plugin-pointlabels');
+const chartistSvgPlugin = require('./chartist-plugin-pointlabels');
 const fs = require("fs");
 
 

@@ -1,0 +1,26 @@
+.ct-chart-line {
+  /* background: #21252c; */
+  background: #282C34;
+}
+
+.ct-vline {
+  stroke: #ffffff55;
+  stroke-width: 8px;
+}
+
+.ct-label {
+  color: #eeeeee;
+  fill: #eeeeee;
+  font-family: "Work Sans", Verdana, Geneva, sans-serif;
+}
+.ct-grid {
+  stroke: rgb(80, 80, 80);
+}
+
+.ct-series-a .ct-line {
+  stroke: url(#lineGradient);
+}
+
+.ct-series-a .ct-point { 
+  stroke-width: 12px;
+}

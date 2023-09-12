@@ -36,6 +36,13 @@ services:
       - postgrest-backend
     restart: unless-stopped
   
+  dillerbase-api:
+    container_name: dillerbase-api
+    build: ./server
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    restart: unless-stopped
+  
 networks:
   postgrest-backend:
     driver: bridge

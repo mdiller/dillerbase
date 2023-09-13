@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "devchart": "watch \"node testchart.js\" ."
   },
   "author": "",
   "license": "ISC",
@@ -15,5 +16,8 @@
     "express": "^4.18.2",
     "node-fetch": "^2.7.0",
     "svgdom": "^0.1.14"
+  },
+  "devDependencies": {
+    "watch": "^1.0.2"
   }
 }

@@ -65,10 +65,18 @@ class ColorGradient {
 
 // END OF IMPORT STUFF  
 
-
-var temperatureGradient = new ColorGradient([ "#0000ff", "#FFA500", "#ff0000" ]);
+var gradientStart = 40;
+var gradientEnd = 90;
+var temperatureGradient = new ColorGradient([
+	"#38a4ca", // 40 ice-blue
+	"#385bca", // 50 blue
+	"#905bca", // 60 purple
+	"#FFA500", // 70 orangeish
+	"#da5500", // 80 dark orange
+	"#ff202c"  // 90 red
+]);
 function getTemperatureColor(temp) {
-	var percent = ((temp - 50) / 40);
+	var percent = ((temp - gradientStart) / (gradientEnd - gradientStart));
 	return temperatureGradient.getColor(percent);
 }
 
@@ -127,8 +135,7 @@ function ctDillerThing(options) {
 			}
 
 			chart.on('draw', function (data) {
-				// console.log(data.type)
-				if (data.type === 'point') {
+				if (data.type === 'point' && data.seriesIndex == 0) {
 					if (data.index == 0) {
 						position.x_p1 = data.x;
 					}
@@ -153,7 +160,6 @@ function ctDillerThing(options) {
 					y1: data.chartRect.y1,
 					y2: data.chartRect.y2
 				}, "ct-vline");
-				// [ "#ff0000", "#00ff00", "#0000ff" ]
 			});
 		}
 	}
@@ -164,14 +170,52 @@ function ctDillerThing(options) {
 
 
 function generateWeatherSvg(weatherData, returnFunc) {
+	var tick_amount = 10;
+	var y_min = Math.min(...weatherData.hourly.temperature_2m);
+	var y_max = Math.max(...weatherData.hourly.temperature_2m);
+	var y_tick_min = (Math.floor(y_min / tick_amount) - 1) * tick_amount;
+	var y_tick_max = (Math.ceil(y_max / tick_amount) + 1) * tick_amount;
+	var y_ticks = [];
+	for (var i = y_tick_min; i <= y_tick_max; i += tick_amount) {
+		y_ticks.push(i);
+	}
+
+	var cloudCoverPercentData = weatherData.hourly.cloudcover.map(p => ((p / 100) * tick_amount) + y_tick_min);
+
+	var mm_max = 6;
+	var rainData = weatherData.hourly.precipitation.map(mm => (Math.min(mm / mm_max, 1.0) * tick_amount) + y_tick_min);
+
 	var data = {
-		labels: ["12am", null, null, null, null, null, "6am", null, "8am", null, "10am", null, "12am", null, "2pm", null, "4pm", null, "6pm", null, "8pm", null, null, "11pm"],
+		labels: ["", null, null, null, null, null, "6:00", null, "8:00", null, "10:00", null, "12:00", null, "2:00", null, "4:00", null, "6:00", null, "8:00", null, null, ""],
 		series: [
-			weatherData.hourly.temperature_2m,
+			{
+				name: "temperature",
+				data: weatherData.hourly.temperature_2m,
+			},
+			{
+				name: "clouds",
+				data: cloudCoverPercentData,
+			},
+			{
+				name: "rain",
+				data: rainData,
+			}
 		]
 	};
 
+
 	var options = {
+		series: {
+			clouds: {
+				showArea: true,
+				showPoint: false,
+			},
+			rain: {
+				showArea: true,
+				showPoint: false,
+				lineSmooth: Chartist.Interpolation.step(),
+			}
+		},
 		width: 900,
 		height: 200,
 		chartPadding: {
@@ -189,10 +233,10 @@ function generateWeatherSvg(weatherData, returnFunc) {
 		},
 		axisY: {
 			type: Chartist.FixedScaleAxis,
-			ticks: [40, 50, 60, 70, 80, 90],
-			low: 40,
+			ticks: y_ticks,
+			low: y_tick_min,
 			showLabel: false,
-			high: 90
+			high: y_tick_max
 		},
 		plugins: [
 			Chartist.plugins.ctPointLabels({

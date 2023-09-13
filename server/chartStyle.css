@@ -2,25 +2,64 @@
   /* background: #21252c; */
   background: #282C34;
 }
-
+/* 
 .ct-vline {
   stroke: #ffffff55;
   stroke-width: 8px;
-}
-
-.ct-label {
-  color: #eeeeee;
-  fill: #eeeeee;
-  font-family: "Work Sans", Verdana, Geneva, sans-serif;
-}
+} */
 .ct-grid {
   stroke: rgb(80, 80, 80);
 }
 
+.ct-labels .ct-label,
+.ct-series-a .ct-label {
+  color: #eeeeee;
+  fill: #eeeeee;
+  font-family: "Work Sans", Verdana, Geneva, sans-serif;
+}
+
+.ct-end {
+  font-size: 12px;
+}
+
+.ct-grid:first-child,
+.ct-grid:last-child,
+.ct-grid:nth-child(10),
+.ct-grid:nth-child(11),
+.ct-grid:nth-child(12) {
+  stroke-dasharray: 0px;
+}
+
+/* TEMPERATURE */
 .ct-series-a .ct-line {
   stroke: url(#lineGradient);
 }
 
 .ct-series-a .ct-point { 
   stroke-width: 12px;
+}
+
+.ct-series-a .ct-area { 
+  fill-opacity: 0;
+}
+
+
+/* CLOUDS */
+.ct-series-b .ct-line {
+  stroke-opacity: 0;
+}
+
+.ct-series-b .ct-area { 
+  fill: #aaaaaa;
+  fill-opacity: 0.6;
+}
+
+/* RAIN */
+.ct-series-c .ct-line {
+  stroke-opacity: 0;
+}
+
+.ct-series-c .ct-area { 
+  fill: #5656ff;
+  fill-opacity: 0.8;
 }

@@ -40,6 +40,10 @@ async function cachedWebRequest(url, expiration_hours, callback) {
 		var response = await fetch(url);
 		var data = await response.json();
 
+		if (data.error) {
+			throw new Error(`Weather API Error: ${data.reason}`);
+		}
+
 		webCache[url] = data;
 		var expirationDate = new Date();
 		expirationDate.setHours(expirationDate.getHours() + expiration_hours);
@@ -75,7 +79,6 @@ async function getWeatherData(date, callback) {
 	var recentDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 	recentDate.setMonth(recentDate.getMonth() - 1); // go back one month
 	if (date >= recentDate) { // this is in future (or recent past) so use forecast api
-		args.forecast_days = "1";
 		var args_string = Object.keys(args).map(key => `${key}=${args[key]}`).join("&");
 		return await cachedWebRequest(`https://api.open-meteo.com/v1/forecast?${args_string}`, 1);
 	}
@@ -92,7 +95,7 @@ app.use("/weather/:date", async (req, res) => {
 		const [year, month, day] = dateString.split('-').map(Number);
 		const date = new Date(year, month - 1, day);
 
-		var weatherData = await getWeatherData(date)
+		var weatherData = await getWeatherData(date);
 
 		weatherChart.generateWeatherSvg(weatherData, svg => {
 			res.setHeader('Content-Type', 'image/svg+xml');
@@ -100,11 +103,9 @@ app.use("/weather/:date", async (req, res) => {
 		});
 	}
 	catch(err) {
-		res.status(500).send("Errored");
+		console.error(`Error on: ${req.baseUrl}`);
+		console.error(err.message);
+		console.error(err.stack);
+		res.status(500).send(`Errored: ${err.message}`);
 	}
-});
-
-// error handler
-app.use((error, request, response, next) => {
-	response.status(500).send("Errored");
 });

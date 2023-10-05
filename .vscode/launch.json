@@ -10,6 +10,13 @@
 			"runtimeArgs": [
 				"run-script", "dev"
 			]
-		}
+		},
+		{
+			"name": "Loader",
+			"type": "python",
+			"request": "launch",
+			"program": "loader/loader.py",
+			"console": "integratedTerminal"
+		},
 	]
 }

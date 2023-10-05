@@ -37,15 +37,20 @@ project_fields = [
 	"start_time"
 ]
 
-async def fetch_data():
+async def fetch_data(last_match_timestamp):
 	steam_id = config["STEAM_ID"]
-	url = f"https://api.opendota.com/api/players/{steam_id}/matches?limit=30"  # Replace with your API endpoint
-	url += "".join(map(lambda x: f"&project={x}", project_fields))
+	url = f"https://api.opendota.com/api/players/{steam_id}/matches?"  # Replace with your API endpoint
+	if last_match_timestamp:
+		days_to_search = int((datetime.now() - datetime.fromtimestamp(last_match_timestamp)).days) + 1
+		url += f"date={days_to_search}&"
+	url += "&".join(map(lambda x: f"project={x}", project_fields))
 	
 	async with aiohttp.ClientSession() as session:
 		async with session.get(url) as response:
 			if response.status == 200:
 				data = await response.json()
+				if last_match_timestamp:
+					data = list(filter(lambda m: m["start_time"] > last_match_timestamp, data))
 				return data
 			else:
 				print(f"Error: {response.status}")
@@ -84,14 +89,36 @@ def insert_data(data, session):
 		session.close()
 
 
+async def update_dota_matches(session):
+	match = session.query(DotaMatch).order_by(DotaMatch.start_time.desc()).first()
+	if match:
+		data = await fetch_data(match.start_time)
+	else:
+		data = await fetch_data(None)
+	
+	if len(data) > 0:
+		print(f"{len(data)} Matches Fetched")
+		insert_data(data, session)
+
+
 async def main():
 	session = create_session(db_url)
-	data = await fetch_data()
-	print(f"{len(data)} Matches Fetched")
-	insert_data(data, session)
+
+	minutes_between_updates = (1 * 60)
+	while True:
+		print("Updating...")
+		await update_dota_matches(session)
+		await asyncio.sleep(int(minutes_between_updates * 60))
 
 
 if __name__ == "__main__":
 	if config["DEBUG"] == "true": # need this for when we're debugging on windows
 		asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-	asyncio.run(main())
+	# asyncio.run(main())
+
+	loop = asyncio.get_event_loop()
+	task = loop.create_task(main())
+	try:
+		loop.run_until_complete(task)
+	except asyncio.CancelledError:
+		pass

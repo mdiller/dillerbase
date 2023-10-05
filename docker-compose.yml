@@ -38,9 +38,18 @@ services:
   
   dillerbase-api:
     container_name: dillerbase-api
-    build: .
+    build:
+      context: .
+      dockerfile: ./server/Dockerfile
     ports:
       - ${SERVER_PORT}:${SERVER_PORT}
+    restart: unless-stopped
+  
+  dillerbase-loader:
+    container_name: dillerbase-loader
+    build:
+      context: .
+      dockerfile: ./loader/Dockerfile
     restart: unless-stopped
   
 networks:

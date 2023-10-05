@@ -14,4 +14,4 @@ WORKDIR /usr/src/app
 RUN pip --disable-pip-version-check install -r requirements.txt 2>&1 | grep --line-buffered -v "pip as the 'root' user"
 
 # command to run on container start
-CMD [ "python", "-u", "./redditbot.py" ]
+CMD [ "python", "-u", "./loader.py" ]

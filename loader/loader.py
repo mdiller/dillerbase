@@ -40,6 +40,7 @@ project_fields = [
 async def fetch_data(last_match_timestamp):
 	steam_id = config["STEAM_ID"]
 	url = f"https://api.opendota.com/api/players/{steam_id}/matches?"  # Replace with your API endpoint
+	url += "significant=0&" # allows us to include turbo games
 	if last_match_timestamp:
 		days_to_search = int((datetime.now() - datetime.fromtimestamp(last_match_timestamp)).days) + 1
 		url += f"date={days_to_search}&"
@@ -89,9 +90,9 @@ def insert_data(data, session):
 		session.close()
 
 
-async def update_dota_matches(session):
+async def update_dota_matches(session, first_run):
 	match = session.query(DotaMatch).order_by(DotaMatch.start_time.desc()).first()
-	if match:
+	if match and not first_run:
 		data = await fetch_data(match.start_time)
 	else:
 		data = await fetch_data(None)
@@ -103,12 +104,14 @@ async def update_dota_matches(session):
 
 async def main():
 	session = create_session(db_url)
+	first_run = True
 
 	minutes_between_updates = (1 * 60)
 	while True:
 		print("Updating...")
-		await update_dota_matches(session)
+		await update_dota_matches(session, first_run)
 		await asyncio.sleep(int(minutes_between_updates * 60))
+		first_run = False
 
 
 if __name__ == "__main__":
